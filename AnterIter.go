@@ -32,10 +32,13 @@ func (ai *AnterIter) Next() bool {
 // If there are no more arguments 
 // it returns an EOA Arg
 func (ai *AnterIter) Get( ) Arg {
-    if ai.peakNext( ) {
-        return ai.an.args[ai.cur_arg]
+    if ai.cur_arg < 0 {
+		return argEOA(-1)
     }
     
-    return ai.an.args[ai.an.arg_count]
+	// We don't need to check the ai.cur_arg 
+	// becouse it won't go further than the 
+	// actual array size
+	return ai.an.args[ai.cur_arg]
 }
 
