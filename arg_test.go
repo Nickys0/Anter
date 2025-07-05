@@ -104,11 +104,29 @@ func TestGetFlags02(t *testing.T){
 	if _, er := parser.GetFlagString("name"); er == nil {
 		t.Fatal("This should fail becouse the flag 'name' doesn't exist!")
 	}
-	
-	
+		
 	printArg(parser)
 }
 
+func TestArgIterator(t *testing.T){
+	defer argTestReset( )
+	DefInit( )
+
+	parser, err := argTestInit(_def_coms, _def_flags)
+	if err != nil {
+		t.Fatalf("error: %s", err.Error())	
+	}
+
+	it := NewIter(&parser)
+	for it.Next( ) {
+		arg := it.Get( )
+		if arg.IsEOA() {
+			log.Printf("Arg[%02d]: %s\n", arg.AIdx(), "<EOA>")
+		}else{
+			log.Printf("Arg[%02d]: %s\n", arg.AIdx(), arg.Str())
+		}
+	}
+}
 /////////////////////////////////////////////////////////////
 //                                                        //
 ///////////////////////////////////////////////////////////
