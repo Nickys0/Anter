@@ -29,12 +29,10 @@ func TestArg01(t *testing.T){
 
 	DefInit( )
 
-	if _, err := argTestInit(_def_coms, _def_flags); err != ERR_NONE {
-		t.Fatal(SErrLog(err))
+	/* This function should not fail */
+	if _, err := argTestInit(_def_coms, _def_flags); err != nil {
+		t.Fatalf("error: %s", err.Error())
 	}
-
-	os.Args = 	nil
-	argv = 		nil
 }
 
 /// @Test [2] Testing an invalid flag error
@@ -48,17 +46,17 @@ func TestLFlag01(t *testing.T){
 
 	flags = append(flags, LFlag{ str: "-bool", tp: FTYPE_VALUE, flag: F_DEFAULT_FLAG })
 	
-	if _, err := argTestInit(_def_coms, flags); err == ERR_NONE{
-		t.Fatal(SErrLog(err))
+	if _, err := argTestInit(_def_coms, flags); err != nil{
+		log.Printf("error: %s", err.Error())
 	}else{
-		ErrLog(err)
+		t.Fatal("This function should fail")
 	}
 }
 
 // Getting the value of flag 
 // Expected: Everything should go well
 // argv: ["binary", "test1, "--bool" "--val", "value"]
-//			 0        1       2        3
+//			 0        1         2        3		 4
 func TestGetFlags01(t *testing.T){
 	defer argTestReset( )
 
@@ -66,8 +64,8 @@ func TestGetFlags01(t *testing.T){
 
 	parser, err := argTestInit(_def_coms, _def_flags)
 
-	if err != ERR_NONE {
-		t.Fatal(SErrLog(err))
+	if err != nil {
+		t.Fatal(err.Error())
 	}
 
 	// We excepect to get the flag value
@@ -99,8 +97,8 @@ func TestGetFlags02(t *testing.T){
 
 	parser, err := argTestInit(_def_coms, _def_flags)
 
-	if err != ERR_NONE{
-		t.Fatal(SErrLog(err))
+	if err != nil{
+		t.Fatal(err)
 	}
 
 	if _, er := parser.GetFlagString("name"); er == nil {
@@ -119,17 +117,18 @@ func TestGetFlags02(t *testing.T){
 /////////////////////////////////////////////////////////////
 //                       INTERNALS                        //
 ///////////////////////////////////////////////////////////
-func argTestInit(coms []string, flags []LFlag) (Anter, int) {
-	if err := InitLib(coms, flags); err != ERR_NONE{
+// Basic fucntion that initialize and analize the arguments
+func argTestInit(coms []string, flags []LFlag) (Anter, error) {
+	if err := InitLib(coms, flags); err != nil {
 		return Anter{}, err
 	}
 	
 	An, err := AnalArg( )
-	if err != ERR_NONE {
+	if err != nil {
 		return Anter{}, err
 	}
 
-	return An, ERR_NONE
+	return An, nil
 }
 
 func argTestReset() {
