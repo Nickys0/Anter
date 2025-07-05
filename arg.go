@@ -31,14 +31,54 @@ func ArgtpToString(tp int) string{
 
 type Arg struct{
 
-	/* Mandatory */
 	tp 	int			/* Arg type */
 	str string 		/* arg str  */
 
-	r_indx int		/* [relative index] base on the arg type */
-	a_indx int		/* Index of the arg that was given from the CLI */
+	r_indx int		/* [relative index] based on the arg type */
+	a_indx int		/* [absolute index] Indicates the arg pos */
+	
+	// TODO: we should try remove this
 	argf int		/* Arg flag: it is used to indicate some addtional info */
 }
+ 
+func (arg *Arg) Str( ) string {
+	return arg.str
+}
+
+func (arg *Arg) GetType( ) int {
+	return arg.tp
+}
+
+func (arg *Arg) IsValidType( ) bool {
+	return arg.tp != ARGTP_UNKNOWN
+}
+
+func (arg *Arg) IsCom( ) bool {
+	return arg.tp == ARGTP_COMMAND
+}
+
+func (arg *Arg) IsFlag( ) bool {
+	return arg.tp == ARGTP_FLAG
+}
+
+func (arg *Arg) IsValue( ) bool {
+	return arg.tp == ARGTP_VALUE
+}
+
+func (arg *Arg) IsBinPath( ) bool {
+	return arg.tp == ARGTP_BINPATH
+}
+
+func (arg *Arg) IsEOA() bool {
+	return arg.tp == ARGTP_EOA
+}
+
+
+
+
+/////////////////////////////////////////////////////////////
+//                       INTERNALS                        //
+///////////////////////////////////////////////////////////
 
 func argFlag_Bool(_str string, r_idx, a_idx int) Arg{
 	return Arg{ tp: ARGTP_FLAG, str: _str, 		// basics
