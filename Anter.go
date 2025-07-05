@@ -306,27 +306,6 @@ func (an *Anter) GetFlagFloat64(flag string) (float64, error){
 	return an.GetFlagFloat(flag, 64)
 }
 
-// It return the first command that occured
-// An Invalid Argument is return if it wasn't present
-func (an *Anter) GetCom() Arg {
-	if len(an.command) > 0 {
-		return *an.command[0]
-	}
-
-	return Arg{}
-}
-
-// It checks if the provided command (as a string) was given by the user
-func (an *Anter) IsComPresent_Str(com string) bool {
-	for _, cm := range an.command {
-		if cm.str == com {
-			return true
-		}
-	}
-
-	return false
-}
-
 // The flag can be provided like "--flag" | "flag" x
 // Return true if the flag was provided false if it wasn't 
 // provided or due to an error
@@ -344,6 +323,27 @@ func (an *Anter) GetFlagBool(flag string) (bool, error){
 // The flag can be provided like "--flag" | "flag"
 func (an *Anter) GetFlagString(flag string) (string, error){
 	return  an.GetFlagValue(flag)
+}
+
+// It return the first command that occured
+// An EOA Arg is return if it wasn't present
+func (an *Anter) GetCom( ) Arg {
+	if len(an.command) > 0 {
+		return *an.command[0]
+	}
+
+	return argEOA(-1)
+}
+
+// It checks if the provided command (as a string) was given by the user
+func (an *Anter) IsComPresent_Str(com string) bool {
+	for _, cm := range an.command {
+		if cm.str == com {
+			return true
+		}
+	}
+
+	return false
 }
 
 
