@@ -1,7 +1,6 @@
 package Anter
 
 import (
-	"errors"
 	"os"
 	"slices"
 	"strconv"
@@ -15,29 +14,6 @@ var _commands [] string
 var _flags []LFlag
 
 var _initialize bool = false
-
-const(
-	ERR_NONE = iota 
-	ERR_EOA				/* End of Arguments */
-	// ERR_UNKNOWN_ARG		/* Unknown argument found */
-	ERR_UNITIALIZED		/* When the InitLib func was not called before the other function this error is thrown */
-
-	//////////////////////////////////////////////
-	// 	An unknown type flag was passed as an argument
-	//
-	// 	ERR LAYOUT:
-	// 	_error_value[offs] = flag_name
-	ERR_UNKFLAG_PASSED
-	
-	////////////////////////////////////////////////
-	// 	When initializing the lib, if a passed flag
-	// 	has an invalid character like '-' this error
-	// 	will be thrown.	
-	//
-	// 	ERR LAYOUT:
-	// 	_error_value[offs] = flag_name
-	ERR_INIT_INVALID_FLAG
-)
 
 type Anter struct{
 	args []Arg			/* Argument array */
@@ -206,11 +182,15 @@ func UnwrapStrFlag(flag string) string{
 // If the flag was not given by the user it returns an error
 func (an *Anter) GetFlagValue(SFlag string) (string, error){
 	out := "" 
+	
+	if !_initialize {
+		return out, ErrF("The Library wasn't initizalized! Call 'InitLib' first")
+	}
 
 	// 1) Flag exist?
 	fIdx := ifFlagExist_Idx(UnwrapStrFlag(SFlag))
 	if fIdx < 0 {
-		return out, errors.New(SErrF("The provided flag was not provided during initialization: %s", GreenTxt(SFlag)))
+		return out, ErrF("The provided flag was not provided during initialization: %s", GreenTxt(SFlag))
 	}
 
 	// 2) was flag provided?
@@ -326,6 +306,27 @@ func (an *Anter) GetFlagFloat64(flag string) (float64, error){
 	return an.GetFlagFloat(flag, 64)
 }
 
+// It return the first command that occured
+// An Invalid Argument is return if it wasn't present
+func (an *Anter) GetCom() Arg {
+	if len(an.command) > 0 {
+		return *an.command[0]
+	}
+
+	return Arg{}
+}
+
+// It checks if the provided command (as a string) was given by the user
+func (an *Anter) IsComPresent_Str(com string) bool {
+	for _, cm := range an.command {
+		if cm.str == com {
+			return true
+		}
+	}
+
+	return false
+}
+
 // The flag can be provided like "--flag" | "flag" x
 // Return true if the flag was provided false if it wasn't 
 // provided or due to an error
@@ -351,24 +352,24 @@ func (an *Anter) GetFlagString(flag string) (string, error){
 ///////////////////////////////////////////////////////////
 
 // [INTERNAL]
-// Returns the idx of the flag if present. < 0 indicates an error
+// Returns the idx of the flag if present. < 0 indicates that it wasn't found
 func itsFlag(a string) int {
 	
-	if !_initialize{
-		return -ERR_UNITIALIZED
+	if !_initialize {
+		return -1
 	}
 
 	var __temp string
 
 	for idx, f := range _flags {
-		if (f.flag & F_DOUBLE_DASHED) == F_DOUBLE_DASHED{
+		if (f.flag & F_DOUBLE_DASHED) == F_DOUBLE_DASHED {
 			__temp = "--" + f.str
 			if a == __temp{
 				return idx
 			}
 		}
 		
-		if (f.flag & F_SINGLE_DASHED) == F_SINGLE_DASHED{
+		if (f.flag & F_SINGLE_DASHED) == F_SINGLE_DASHED {
 			__temp = "-" + f.str
 			if a == __temp{
 				return idx
