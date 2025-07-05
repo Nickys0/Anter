@@ -2,7 +2,6 @@ package Anter
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"slices"
 	"strconv"
@@ -82,39 +81,45 @@ func pushErrorVal(val string){
 // ** Mandatory **
 // This is the first function to be called to
 //	Init the library
-func InitLib(com []string, fls []LFlag) int{
+func InitLib(com []string, fls []LFlag) error{
 	__temp := os.Args
 
 	// We split the value declared as: "--flag=value"
 	for _, a := range __temp{
 		argv = append(argv, strings.Split(a, "=")...)
 	}
-	argc = len(argv)
 
+	argc = len(argv)
 	_commands = com
 
-	//TODO: we shall validate the coms and the flags:
+	// TODO #[1]: we shall validate the coms and the flags:
 	// Checking that the flag only contains the name and not the dashes
 	_flags = fls
-	for _, f := range fls{
+	for _, f := range fls {
 		if f.tp == FTYPE_UNKNOWN {
-			pushErrorVal(f.str); return ERR_UNKFLAG_PASSED
+			flag := ""
+			if f.str == "" {
+				flag = "NULL"
+			}
+			return ErrF("Invalid flag passed to %s: <%s>", 
+							GreenTxt("InitLib"), flag)
 		}
 		
 		if strings.Contains(f.str, "-"){
-			pushErrorVal(f.str); return ERR_INIT_INVALID_FLAG
+			return ErrF("invalid flag passed in func %s: <%s>", 
+							GreenTxt("InitLib"), RedTxt(f.str))
 		}
 	}
 
 	_initialize = true
-	return ERR_NONE
+	return nil
 }
 
-func AnalArg() (Anter, int){
+func AnalArg() (Anter, error){
 	var out Anter
 
 	if !_initialize {
-		return out, ERR_UNITIALIZED
+		return out, ErrF("The Library wasn't initizalized! Call 'InitLib' first")
 	}
 
 	out.args = append(out.args, Arg{str: argv[0], tp: ARGTP_BINPATH, r_indx: -1})
@@ -151,12 +156,7 @@ func AnalArg() (Anter, int){
 			out.flags = append(out.flags, &out.args[out.arg_count])
 
 		}else{
-			// if idx <= 0{
-			// 	out.args = append(out.args, argBasic(ARGTP_UNKNOWN, a, -1, (idx + 1)))
-			// 	// panic("[01]: This is not possible")
-			// }
 
-			// last_arg := peakArg(idx)
 			last_arg := out.args[out.arg_count - 1]
 
 			/* If the prec arg was a valueable flag the 
@@ -173,7 +173,7 @@ func AnalArg() (Anter, int){
 
 	out.args = append(out.args, argEOA(out.arg_count))
 
-	return out, 0
+	return out, nil
 }
 
 // Returns < 0 if the flag was not found
@@ -354,7 +354,6 @@ func (an *Anter) GetFlagString(flag string) (string, error){
 }
 
 
-
 /////////////////////////////////////////////////////////////
 //                       INTERNALS                        //
 ///////////////////////////////////////////////////////////
@@ -389,61 +388,33 @@ func itsFlag(a string) int {
 }
 
 
-// [INTERNAL]
-// This function fill in the Arg struture 
-// based on an immadiate analysis of the args
-// func immCompArg(arg string) Arg{
-// 	out := Arg{tp: ARGTP_UNKNOWN, str: arg, r_indx: -1, argf: ARGF_NONE}
-// 	/* Commands */
-// 	if idx := slices.Index(_commands, arg); idx >= 0{
-// 		out.tp = ARGTP_COMMAND
-// 		out.r_indx = idx
-// 	}
-// 	/* Flags */
-// 	if idx := itsFlag(arg); idx >= 0 {
-// 		out.tp = ARGTP_FLAG
-// 		out.r_indx = idx
-// 		out.argf = _flags[idx].tp
-// 	}
-// 	return out
-// }
-// [INTERNAL]
-// func peakArg(idx int) Arg{
-// 	if idx >= argc{
-// 		return Arg{tp: ARGTP_EOA, str: "", r_indx: -1, argf: ARGF_NONE}
-// 	}
-// 	return immCompArg(argv[idx])
-// }
-
 // It returns the corresponding error string 
 // based on the error id
-func SErrLog(err_id int) string{
-	switch err_id {
-	case ERR_NONE:			return "No Error"
-	case ERR_UNITIALIZED:	return "The library was not initialized properly"
-	case ERR_EOA:			return "End of Arguments reached"	/* Its too generic */
-	case ERR_UNKFLAG_PASSED:
-		if _errval_count < 1 {
-			panic("Expected an error value but didn't found it!")
-		}
-		return SErrF("Unknown flag: <%s>", _err_values[_errval_count - 1])
-	case ERR_INIT_INVALID_FLAG:
-		if _errval_count < 1 {
-			panic("Expected an error value but didn't found it!")
-		}
-		return SErrF("Invalid flag passed in func %s: <%s>", 
-							 GreenTxt("InitLib"),
-							_err_values[_errval_count - 1])
-	default:
-		panic("Unknown error id")
-	}
-}
-
-// It prints out the error log of the specifed id
-func ErrLog(err_id int) {
-	fmt.Println(SErrLog(err_id))
-}
+// func SErrLog(err_id int) string{
+// 	switch err_id {
+// 	case ERR_NONE:			return "No Error"
+// 	case ERR_UNITIALIZED:	return "The library was not initialized properly"
+// 	case ERR_EOA:			return "End of Arguments reached"	/* Its too generic */
+// 	case ERR_UNKFLAG_PASSED:
+// 		if _errval_count < 1 {
+// 			panic("Expected an error value but didn't found it!")
+// 		}
+// 		return SErrF("Unknown flag: <%s>", _err_values[_errval_count - 1])
+// 	case ERR_INIT_INVALID_FLAG:
+// 		if _errval_count < 1 {
+// 			panic("Expected an error value but didn't found it!")
+// 		}
+// 		return SErrF("Invalid flag passed in func %s: <%s>", 
+// 							 GreenTxt("InitLib"),
+// 							_err_values[_errval_count - 1])
+// 	default:
+// 		panic("Unknown error id")
+// 	}
+// }
+// // It prints out the error log of the specifed id
+// func ErrLog(err_id int) {
+// 	fmt.Println(SErrLog(err_id))
+// }
 
 // TODOS:
-//  use default error log system from golang
 //	We could use a structure named AnErr that contains an error ID and the relative string 
