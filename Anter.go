@@ -176,7 +176,7 @@ func UnwrapStrFlag(flag string) string{
 
 // For boolean flag it return TRUE | FALSE based on
 //   if the flag was provied or not
-// For valueable flag it returns the flag value if 
+// For valuable flag it returns the value if
 //   given or an error
 // If the flag was not provided during initialization it return an error
 // If the flag was not given by the user it returns an error
@@ -379,35 +379,6 @@ func itsFlag(a string) int {
 
 	return -1
 }
-
-
-// It returns the corresponding error string 
-// based on the error id
-// func SErrLog(err_id int) string{
-// 	switch err_id {
-// 	case ERR_NONE:			return "No Error"
-// 	case ERR_UNITIALIZED:	return "The library was not initialized properly"
-// 	case ERR_EOA:			return "End of Arguments reached"	/* Its too generic */
-// 	case ERR_UNKFLAG_PASSED:
-// 		if _errval_count < 1 {
-// 			panic("Expected an error value but didn't found it!")
-// 		}
-// 		return SErrF("Unknown flag: <%s>", _err_values[_errval_count - 1])
-// 	case ERR_INIT_INVALID_FLAG:
-// 		if _errval_count < 1 {
-// 			panic("Expected an error value but didn't found it!")
-// 		}
-// 		return SErrF("Invalid flag passed in func %s: <%s>", 
-// 							 GreenTxt("InitLib"),
-// 							_err_values[_errval_count - 1])
-// 	default:
-// 		panic("Unknown error id")
-// 	}
-// }
-// // It prints out the error log of the specifed id
-// func ErrLog(err_id int) {
-// 	fmt.Println(SErrLog(err_id))
-// }
 
 // TODOS:
 //	We could use a structure named AnErr that contains an error ID and the relative string 
