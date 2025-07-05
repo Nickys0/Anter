@@ -12,7 +12,6 @@ const(
 	ARGTP_BINPATH
 
 	ARGTP_UNKNOWN = -1
-
 	ARGF_NONE = -1
 )
 
@@ -35,7 +34,7 @@ type Arg struct{
 	str string 		/* arg str  */
 
 	r_indx int		/* [relative index] based on the arg type */
-	a_indx int		/* [absolute index] Indicates the arg pos */
+	a_indx int		/* [argument index] Indicates the arg pos */
 	
 	// TODO: we should try remove this
 	argf int		/* Arg flag: it is used to indicate some addtional info */
@@ -45,10 +44,25 @@ func (arg *Arg) Str( ) string {
 	return arg.str
 }
 
-func (arg *Arg) GetType( ) int {
+func (arg *Arg) Type( ) int {
 	return arg.tp
 }
 
+// Warning the returned idx doesn't always
+// mean that the specified argument is in os.Arg[a_indx]
+func (arg *Arg) AIdx( ) int {
+	return arg.a_indx
+}
+
+// If the arg is a flag or a command
+// this return the index of the flag | command
+// in the array that was provided with the function 'InitLib'
+func (arg *Arg) RIdx( ) int {
+	return arg.r_indx
+}
+
+// An invalid type is any argument that has his
+// type == ARGTP_UNKNOWN
 func (arg *Arg) IsValidType( ) bool {
 	return arg.tp != ARGTP_UNKNOWN
 }
