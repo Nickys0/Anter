@@ -15,14 +15,6 @@ var _flags []LFlag
 
 var _initialize bool = false
 
-type Anter struct{
-	args []Arg			/* Argument array */
-	arg_count int		/* Argument count ::! Not always is equal to argc */
-
-	command []*Arg 		/* Arg refrence to commands if present */
-	flags []*Arg		/* Arg reference to flags if present */
-}
-
 // LFlag.tp
 const(
 	FTYPE_UNKNOWN = iota	/* It is used to indicate an error */
@@ -39,12 +31,19 @@ const(
 	F_DEFAULT_FLAG = 3
 )
 
-type LFlag struct{
+type LFlag struct {
 	str 	string	/* flag string */
 	tp 		int		/* Indicates the flag value type: FTYPE_... */
-	flag 	int		/* It is used to indicate some info about the flag: F_...*/ 
+	flag 	int		/* It is used to indicate some info about the flag: F_...*/
 }
 
+type Anter struct {
+	args 	[]Arg		/* Argument array */
+	arg_count int		/* Argument count ::! Not always is equal to argc */
+
+	command []*Arg 		/* Arg refrence to commands if present */
+	flags 	[]*Arg		/* Arg reference to flags if present */
+}
 
 // ** Mandatory **
 // This is the first function to be called to
