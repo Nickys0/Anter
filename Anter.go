@@ -16,9 +16,6 @@ var _flags []LFlag
 
 var _initialize bool = false
 
-var _err_values [5] string	/* Internally used for error logging */
-var _errval_count int = 0
-
 const(
 	ERR_NONE = iota 
 	ERR_EOA				/* End of Arguments */
@@ -72,11 +69,6 @@ type LFlag struct{
 	flag 	int		/* It is used to indicate some info about the flag: F_...*/ 
 }
 
-
-func pushErrorVal(val string){
-	_err_values[_errval_count] = val
-	_errval_count++
-}
 
 // ** Mandatory **
 // This is the first function to be called to
