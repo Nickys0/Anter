@@ -1,0 +1,156 @@
+package Anter
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"path"
+	"testing"
+)
+
+var _def_coms = []string{"test1", "test2", "test3", "test4"}
+var _def_flags = []LFlag{
+	{ str: "bool", tp: FTYPE_BOOL,  flag: F_DEFAULT_FLAG  },
+	{ str: "val", tp: FTYPE_VALUE, flag: F_DEFAULT_FLAG  },
+}
+
+
+/////////////////////////////////////////////////////////////
+//                        TESTERS                         //
+///////////////////////////////////////////////////////////
+
+func DefInit(){
+	os.Args = []string{"binpath", "test1", "--val", "value"}
+}
+
+/// @Test [1] Command + flag and value
+func TestArg01(t *testing.T){
+	defer argTestReset( )
+
+	DefInit( )
+
+	if _, err := argTestInit(_def_coms, _def_flags); err != ERR_NONE {
+		t.Fatal(SErrLog(err))
+	}
+
+	os.Args = 	nil
+	argv = 		nil
+}
+
+/// @Test [2] Testing an invalid flag error
+func TestLFlag01(t *testing.T){
+	defer argTestReset( )
+
+	DefInit()
+
+	var flags []LFlag 
+	copy(flags, _def_flags)
+
+	flags = append(flags, LFlag{ str: "-bool", tp: FTYPE_VALUE, flag: F_DEFAULT_FLAG })
+	
+	if _, err := argTestInit(_def_coms, flags); err == ERR_NONE{
+		t.Fatal(SErrLog(err))
+	}else{
+		ErrLog(err)
+	}
+}
+
+// Getting the value of flag 
+// Expected: Everything should go well
+// argv: ["binary", "test1, "--bool" "--val", "value"]
+//			 0        1       2        3
+func TestGetFlags01(t *testing.T){
+	defer argTestReset( )
+
+	os.Args = []string{"binary", "test", "--bool", "--val", "value"}
+
+	parser, err := argTestInit(_def_coms, _def_flags)
+
+	if err != ERR_NONE {
+		t.Fatal(SErrLog(err))
+	}
+
+	// We excepect to get the flag value
+	if name, er := parser.GetFlagString("--val"); er == nil {
+		assert(name != "", "Empty string error!")
+		fmt.Printf("The provided value was: %q\n", name)
+	}else{
+		t.Fatal(er.Error())
+	}
+
+	// We excepect get true as the return value
+	if boolean, er := parser.GetFlagBool("--bool"); er == nil {
+		assert(boolean == true, "The flag was not given or an error was occured")
+		log.Printf("The flag was succesfully provied! %q", "bool")
+	} else{
+		t.Fatalf("%s", er.Error())
+	}
+
+	printArg(parser)
+}
+
+// Getting the value of flag 
+// Expected: GetFlagString should fail becouse 
+// 			the flag "name" doesn't exist
+func TestGetFlags02(t *testing.T){
+	defer argTestReset( )
+	
+	DefInit()
+
+	parser, err := argTestInit(_def_coms, _def_flags)
+
+	if err != ERR_NONE{
+		t.Fatal(SErrLog(err))
+	}
+
+	if _, er := parser.GetFlagString("name"); er == nil {
+		t.Fatal("This should fail becouse the flag 'name' doesn't exist!")
+	}
+	
+	
+	printArg(parser)
+}
+
+/////////////////////////////////////////////////////////////
+//                                                        //
+///////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////
+//                       INTERNALS                        //
+///////////////////////////////////////////////////////////
+func argTestInit(coms []string, flags []LFlag) (Anter, int) {
+	if err := InitLib(coms, flags); err != ERR_NONE{
+		return Anter{}, err
+	}
+	
+	An, err := AnalArg( )
+	if err != ERR_NONE {
+		return Anter{}, err
+	}
+
+	return An, ERR_NONE
+}
+
+func argTestReset() {
+	os.Args = 	nil
+	argv = 		nil
+	argc = 		0
+}
+
+func printArg(an Anter){
+	for idx, arg := range an.args{
+		switch arg.tp {
+		case ARGTP_EOA:
+			fmt.Printf("Arg[%02d]{str: %10s, type: %10s}\n", idx, "<EOA>", ArgtpToString(arg.tp))
+		case ARGTP_BINPATH:
+			fmt.Printf("\nArg[%02d]{str: %10s, type: %10s}\n", idx, path.Base(arg.str), ArgtpToString(arg.tp))
+		case ARGTP_COMMAND, ARGTP_FLAG, ARGTP_UNKNOWN, ARGTP_VALUE:
+			fmt.Printf("Arg[%02d]{str: %10s, type: %10s}\n", idx, arg.str, ArgtpToString(arg.tp))
+		default:
+			panic("invalid type")
+		}
+	}
+
+	fmt.Println("")
+}
