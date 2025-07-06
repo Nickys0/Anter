@@ -127,6 +127,24 @@ func TestArgIterator(t *testing.T){
 		}
 	}
 }
+
+func TestArgLast(t *testing.T){
+	defer argTestReset()
+	DefInit()
+
+	parser, err := argTestInit(_def_coms, _def_flags)
+	if err != nil {
+		t.Fatalf("%s: %s", RedTxt("error"), err.Error())
+	}
+
+	last := parser.args[parser.arg_count] 
+	if last.IsEOA( ) {
+		log.Printf("Last Argument[%d]: <EOA>", last.a_indx)
+	}else{
+		t.Fatalf("error: this argument should be the last but is type: %s", ArgtpToString(last.tp))
+	}
+
+}
 /////////////////////////////////////////////////////////////
 //                                                        //
 ///////////////////////////////////////////////////////////
