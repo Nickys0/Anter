@@ -42,3 +42,14 @@ func (ai *AnterIter) Get( ) Arg {
 	return ai.an.args[ai.cur_arg]
 }
 
+// If exist return the next arg otherwise 
+// it returns an EOA arg.
+// Use Arg.IsEOA() to see if so
+func (ai *AnterIter) GetNext( ) Arg {
+	if ai.peakNext( ) {
+		ai.cur_arg += 1;
+		return ai.an.args[ai.cur_arg]
+	}
+
+	return ai.an.args[ai.an.arg_count] // This should return the last (EOA)
+}
