@@ -8,34 +8,12 @@ import (
 )
 
 var argv [] string
-var argc int
+var argc 	int
 
 var _commands [] string
 var _flags []LFlag
 
 var _initialize bool = false
-
-// LFlag.tp
-const(
-	FTYPE_UNKNOWN = iota	/* It is used to indicate an error */
-	FTYPE_BOOL				/* It means that the flag didn't expect any value */
-	FTYPE_VALUE				/* It specifies that the flag expect a value */
-)
-
-// LFlag.flag
-const(
-	F_SINGLE_DASHED = 1 << iota
-	F_DOUBLE_DASHED
-	F_CONCAT
-
-	F_DEFAULT_FLAG = 3
-)
-
-type LFlag struct {
-	str 	string	/* flag string */
-	tp 		int		/* Indicates the flag value type: FTYPE_... */
-	flag 	int		/* It is used to indicate some info about the flag: F_...*/
-}
 
 type Anter struct {
 	args 	[]Arg		/* Argument array */
@@ -82,6 +60,8 @@ func InitLib(com []string, fls []LFlag) error{
 	return nil
 }
 
+// This function analise the argv from os.Argv
+// and stores the info in the Anter structure
 func AnalArg() (Anter, error){
 	var out Anter
 
@@ -143,8 +123,10 @@ func AnalArg() (Anter, error){
 	return out, nil
 }
 
+// TODO: make this function public: 
+// 		 func FlagIdx(...) int
 // Returns < 0 if the flag was not found
-func ifFlagExist_Idx(flag string) int{
+func ifFlagExist_Idx(flag string) int {
 	for idx, f := range _flags {
 		if f.str == flag {
 			return  idx
@@ -164,6 +146,10 @@ func (an *Anter) isFlagPrs(SFlag string) int {
 	return -1
 }
 
+// TODO: add support for single dashed flag:
+//	"-h"	->	"h" | "help"
+// This function remove the flag header ("--" | "-")
+// from the provided string and returns the result
 func UnwrapStrFlag(flag string) string{
 	out := flag
 	if strings.Contains(out, "-"){
@@ -217,7 +203,7 @@ func (an *Anter) GetFlagValue(SFlag string) (string, error){
 	// 4) Return the flag value
 	return out, nil
 }
-
+ 
 // The flag can be provided like "--flag" | "flag" 
 func (an *Anter) GetFlagInt(flag string, bitSize int) (int64, error){
 	str_val, err := an.GetFlagValue(flag)
@@ -305,7 +291,7 @@ func (an *Anter) GetFlagFloat64(flag string) (float64, error){
 	return an.GetFlagFloat(flag, 64)
 }
 
-// The flag can be provided like "--flag" | "flag" x
+// The 'flag' can be passed like "--flag" | "flag" 
 // Return true if the flag was provided false if it wasn't 
 // provided or due to an error
 func (an *Anter) GetFlagBool(flag string) (bool, error){
@@ -334,6 +320,7 @@ func (an *Anter) GetCom( ) Arg {
 	return argEOA(-1)
 }
 
+// TODO? shall we call this function without the _Str suffix?
 // It checks if the provided command (as a string) was given by the user
 func (an *Anter) IsComPresent_Str(com string) bool {
 	for _, cm := range an.command {
@@ -380,4 +367,5 @@ func itsFlag(a string) int {
 }
 
 // TODOS:
-//	We could use a structure named AnErr that contains an error ID and the relative string 
+//	Add support for shorthand flags 
+//	Move all the private function in the appropriate section
