@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-var argv [] string
+var argv  []string
 var argc 	int
 
-var _commands [] string
-var _flags []LFlag
+var _commands []string
+var _flags 	  []LFlag
 
 var _initialize bool = false
 
@@ -211,7 +211,7 @@ func (an *Anter) GetFlagInt(flag string, bitSize int) (int64, error){
 		return  0, err
 	}
 	
-	return  strconv.ParseInt(str_val, 10, bitSize)
+	return strconv.ParseInt(str_val, 10, bitSize)
 }
 
 // The flag can be provided like "--flag" | "flag" 
@@ -350,7 +350,7 @@ func itsFlag(a string) int {
 	for idx, f := range _flags {
 		if (f.flag & F_DOUBLE_DASHED) == F_DOUBLE_DASHED {
 			__temp = "--" + f.str
-			if a == __temp{
+			if a == __temp {
 				return idx
 			}
 		}
@@ -369,3 +369,7 @@ func itsFlag(a string) int {
 // TODOS:
 //	Add support for shorthand flags 
 //	Move all the private function in the appropriate section
+//  Add func: ArgCount( )   // Should return Anter.arg_count - 1 (becouse of binpath)
+// 			  NoArg( )		// Should return true if no arguments (aside from the binpath) were priveded 
+// 			  GetFlagValueIfGiven( ) // Should return the value only if given and if it doesn't it just return an empty string
+//			  WasFlagGiven( )		// returns false if an error occured or becouse it wasn't given 
